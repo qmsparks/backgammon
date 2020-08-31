@@ -1,0 +1,87 @@
+:root {
+  /* body and board colors */
+  --body: lightgray;
+  --board: lightgray;
+  --bar: white;
+  --odd: pink;
+  --even: black;
+
+  /* piece colors */
+}
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#board {
+  border: 3px solid black;
+  background-color: var(--board);
+  width: 250px;
+  height: 313px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+section {
+  height: 144px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.table {
+  display: flex;
+  justify-content: space-between;
+  height: 144px;
+}
+
+#bar {
+  background-color: var(--bar);
+  width: 250px;
+  height: 25px;
+}
+
+.right .odd {
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-right: 100px solid var(--odd);
+  border-bottom: 12px solid transparent;
+}
+
+.right .even {
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-right: 100px solid var(--even);
+  border-bottom: 12px solid transparent;
+}
+
+
+.left .odd {
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-left: 100px solid var(--odd);
+  border-bottom: 12px solid transparent;
+}
+
+.left .even {
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-left: 100px solid var(--even);
+  border-bottom: 12px solid transparent;
+}
+
+
+
