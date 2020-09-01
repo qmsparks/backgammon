@@ -24,6 +24,10 @@ body {
   align-items: center;
 }
 
+button {
+  align-self: flex-start;
+}
+
 #board {
   border: 3px solid black;
   background-color: var(--board);
