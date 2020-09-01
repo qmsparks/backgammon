@@ -47,15 +47,24 @@ const populateBoard = function(object) {
   }
 
 }
+setUp.forEach(populateBoard);
+let selectedPiece = null;
 
 const getPiece = function(e) {
+  // let selectedPiece = $(e.target);
+  selectedPiece = $(e.target);
+  console.log(`I will make this piece look different from the others`);
   
-
-  console.log($(e.target).parent().parent().attr('id'));
+  $('.point').on('click', movePieceTo);
 }
 
-setUp.forEach(populateBoard);
+const movePieceTo = function(e) {
+  let selectedPoint = $(e.target).siblings('.piecesList');
 
+  console.log()
+  // console.log(`Move piece from ${startPoint} to ${selectedPoint}`);
+  $(selectedPoint).append(selectedPiece);
+}
 
 
 $('.piece').on('click', getPiece);
