@@ -48,23 +48,31 @@ const populateBoard = function(object) {
 
 }
 setUp.forEach(populateBoard);
-let selectedPiece = null;
+let currentOpponent = 'player2';
+let $selectedPiece = null;
+let $selectedPoint = null;
 
 const getPiece = function(e) {
-  // let selectedPiece = $(e.target);
-  selectedPiece = $(e.target);
-  console.log(`I will make this piece look different from the others`);
-  
-  $('.point').on('click', movePieceTo);
+  $selectedPiece = $(e.target);
+  // TODO add a class that changes the way selected pieces look
+  $('.point').on('click', checkValidMove);
 }
 
-const movePieceTo = function(e) {
-  let selectedPoint = $(e.target).siblings('.piecesList');
+const checkValidMove = function(e) {
+  $selectedPoint = $(e.target).siblings('.piecesList');
 
-  console.log()
-  // console.log(`Move piece from ${startPoint} to ${selectedPoint}`);
-  $(selectedPoint).append(selectedPiece);
+  if (!$selectedPoint.children().hasClass(`${currentOpponent}`)) {
+    movePiece();
+  } else if ($selectedPoint.children().length > 1) {
+    console.log(`Illegal move`);
+  } else {
+    console.log(`Capture piece`);
+  }
 }
 
+const movePiece = function(e) {
+  // let selectedPoint = $(e.target).siblings('.piecesList');
+  $selectedPoint.append($selectedPiece);
+}
 
 $('.piece').on('click', getPiece);
