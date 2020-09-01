@@ -88,7 +88,9 @@ const checkValidMove = function(e) {
   } else if ($selectedPoint.children().length > 1) {
     console.log(`Illegal move`);
   } else {
-    console.log(`Capture piece`);
+    // console.log(`Capture piece`);
+    $('#barredPieces').append($selectedPoint.children().eq(0));
+    movePiece();
   }
 }
 

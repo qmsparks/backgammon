@@ -103,6 +103,12 @@ button {
   display: flex;
 }
 
+#barredPieces {
+  list-style-type: none;
+  display: flex;
+  justify-content: center;
+}
+
 .piece {
   width: 40px;
   height: 40px;
