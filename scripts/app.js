@@ -50,6 +50,7 @@ const populateBoard = function(object) {
 
 }
 setUp.forEach(populateBoard);
+let currentPlayer = 'player1';
 let currentOpponent = 'player2';
 let $selectedPiece = null;
 let $selectedPoint = null;
@@ -87,8 +88,8 @@ const checkValidMove = function(e) {
     movePiece();
   } else if ($selectedPoint.children().length > 1) {
     console.log(`Illegal move`);
+    // TODO fix bug where attempting illegal moves still removes that number from the die result array
   } else {
-    // console.log(`Capture piece`);
     $('#barredPieces').append($selectedPoint.children().eq(0));
     movePiece();
   }
@@ -96,9 +97,13 @@ const checkValidMove = function(e) {
 
 const movePiece = function(e) {
   $selectedPoint.append($selectedPiece);
+
+  if(dieResults.length === 0) {
+    switchPlayer();
+  }
 }
 
-$('.piece').on('click', getPiece);
+
 
 $('button').on('click', function() {
   dieResults.push(Math.ceil(Math.random() * 6));
@@ -109,4 +114,43 @@ $('button').on('click', function() {
     dieResults.push(dieResults[1]);
   }
   console.log(dieResults);
+  startTurn();
 });
+
+const startTurn = function(){
+  if ($('#barredPieces').children().hasClass(`${currentPlayer}`)) {
+    addressBar();
+  }
+  $('.piece').on('click', getPiece);
+}
+
+const switchPlayer = function() {
+  points.reverse();
+  if (currentPlayer === 'player1') {
+    currentPlayer = 'player2';
+    currentOpponent = 'player1';
+  } else {
+    currentPlayer = 'player1';
+    currentOpponent = 'player2';
+  }
+}
+
+const addressBar = function() {
+  const canDisbar = [];
+  console.log(`${currentPlayer} has a barred piece!`);
+  for (let i = 0; i < 6; i++) {
+    if ($(`#${points[i]} ul`).children().hasClass(`${currentPlayer}`) || $(`#${points[i]} ul`).children().length < 2) {
+      canDisbar.push(true);
+    } else {
+      canDisbar.push(false);
+    }
+  }
+  if (canDisbar.includes(true)) {
+    console.log(`You can move!`);
+    // TODO make sure the player can't move any other pieces until they have disbarred
+  } else {
+    console.log(`No valid moves. Player must forfeit turn`);
+    switchPlayer();
+  }
+
+}
