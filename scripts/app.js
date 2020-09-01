@@ -42,13 +42,20 @@ const setUp = [
 ];
 
 const populateBoard = function(object) {
-  console.log(`Appending ${object.number} stones to point ${object.point} for ${object.color}`);
-
   for (let i = 0; i < object.number; i++) {
     $(`${object.point} > .piecesList`).append($(`<li class="piece ${object.color}" />`));
   }
 
 }
 
+const getPiece = function(e) {
+  
+
+  console.log($(e.target).parent().parent().attr('id'));
+}
+
 setUp.forEach(populateBoard);
 
+
+
+$('.piece').on('click', getPiece);
