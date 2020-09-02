@@ -3,6 +3,7 @@ class Player {
     this.discClass = discClass;
     this.onBar = false;
     this.canDisbar = [];
+    this.disbarOptions = [];
     this.piecesBornOff = 0;
   }
 
@@ -13,27 +14,41 @@ class Player {
     $('.piece').on('click', this.getPiece);
   }
 
-    addressBar() {
-      console.log(`${this.discClass} has a barred piece!`);
-      for (let i = 0; i < 6; i++) {
-        if ($(`#${gameManager.points[i]} ul`).children().hasClass(`${this.discClass}`) || $(`#${gameManager.points[i]} ul`).children().length < 2) {
-          this.canDisbar.push(true);
-        } else {
-          this.canDisbar.push(false);
-        }
-      }
-      if (this.canDisbar.includes(true)) {
-        console.log(`You may be able to move!`);
-      } else {
-        console.log(`No valid moves. Player must forfeit turn`);
-        gameManager.switchPlayer();
-      }
-    }
-
   getPiece(e) {
     gameManager.$selectedPiece = $(e.target);
     $('.point').on('click', gameManager.checkPermittedDistance);
   }
+
+  addressBar() {
+    // console.log(`${this.discClass} has a barred piece!`);
+    for (let i = 0; i < 6; i++) {
+      if ($(`#${gameManager.points[i]} ul`).children().hasClass(`${this.discClass}`) || $(`#${gameManager.points[i]} ul`).children().length < 2) {
+        this.canDisbar.push(true);
+      } else {
+        this.canDisbar.push(false);
+      }
+    }
+    if (this.canDisbar.includes(true)) {
+      // console.log(`You may be able to move!`);
+      // TODO figure out disbarring logic!
+      for (let i = 0; i < this.canDisbar.length; i++) {
+        if (this.canDisbar[i]) {
+          this.disbarOptions.push(i +1);
+        }
+        if(!this.disbarOptions.includes(gameManager.dieResults[0]) && !this.disbarOptions.includes(gameManager.dieResults[1])) {
+          console.log(`No valid moves. Player must forfeit turn`);
+          gameManager.switchPlayer();
+        } else {
+          // disbar (which may want its own function?)
+        }
+      }
+    } else {
+      console.log(`No valid moves. Player must forfeit turn`);
+      gameManager.switchPlayer();
+    }
+  }
+
+ 
 }
 
 const player1 = new Player('player1');
