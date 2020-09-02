@@ -5,13 +5,40 @@ class Player {
     this.canDisbar = [];
     this.disbarOptions = [];
     this.piecesBornOff = 0;
+    this.occupiedPoints = [];
+    this.legalPoints = [];
   }
 
   startTurn() {
     if (this.onBar) {
       $(`.piecesList .piece.${this.discClass}`).removeClass('clickable');
     }
+    this.occupiedPoints = [];
+    this.legalPoints = [];
+    for (let i = 0; i < gameManager.points.length; i++) {
+      if($(`#${gameManager.points[i]} .piece`).hasClass(this.discClass)) {
+        this.occupiedPoints.push(gameManager.points[i]);
+      }
+    }
+    for(let i = 0; i < this.occupiedPoints.length; i++) {
+      this.legalPoints.push(this.checkCanMove(this.occupiedPoints[i]));
+    }
+    
+    if(!this.legalPoints.includes(true)) {
+      console.log('No legal moves, player must forfeit turn');
+      gameManager.switchPlayer();
+    }
     $('.clickable').on('click', this.getPiece);
+  }
+
+  checkCanMove(startPoint) {
+    let startIndex = gameManager.points.findIndex(point => point === startPoint);
+    for (let i = 0; i < gameManager.points.length; i++) {
+      if (gameManager.dieResults.includes(i - startIndex)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   getPiece(e) {
@@ -81,7 +108,10 @@ const gameManager = {
   },
   checkPermittedDistance(e) {
     gameManager.$selectedPoint = $(e.target).siblings('.piecesList');
-    let distance = gameManager.points.findIndex(gameManager.getTargetIndex) - gameManager.points.findIndex(gameManager.getStartIndex);
+    const start = gameManager.$selectedPiece.parent().parent().attr('id');
+    const target = gameManager.$selectedPoint.parent().attr('id');
+
+    let distance = gameManager.points.findIndex(point => point === target) - gameManager.points.findIndex(point => point === start);
 
     if(gameManager.dieResults.includes(distance)) {
       let usedResult = gameManager.dieResults.findIndex(function(number){
@@ -107,17 +137,14 @@ const gameManager = {
     if(!$('#barredPieces').children().hasClass(`${gameManager.currentPlayer.discClass}`)) {
       gameManager.currentPlayer.onBar = false;
       $(`.${gameManager.currentPlayer.discClass}`).addClass('clickable');
+    } else {
+      $(`.piecesList .piece.${gameManager.currentPlayer.discClass}`).removeClass('clickable');
     }
+    
 
     if (gameManager.dieResults.length === 0) {
       gameManager.switchPlayer();
     }
-  },
-  getStartIndex(element) {
-    return element ==gameManager.$selectedPiece.parent().parent().attr('id');
-  },
-  getTargetIndex(element) {
-    return element == gameManager.$selectedPoint.parent().attr('id');
   },
   switchPlayer() {
     gameManager.points.reverse();
