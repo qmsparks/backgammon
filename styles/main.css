@@ -112,6 +112,8 @@ li{
 .piecesList {
   width: 225px;
   justify-content: flex-start;
+  /* flex-wrap: wrap; */
+  /* overflow: hidden; */
 }
 
 .piece {
@@ -126,3 +128,6 @@ li{
   position: absolute;
 }
 
+.selected {
+  border: 2px solid gold;
+}

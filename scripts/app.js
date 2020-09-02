@@ -1,19 +1,22 @@
 class Player {
-  constructor(discClass) {
+  constructor(discClass, homeField) {
     this.discClass = discClass;
+    this.$homeField = $(`${homeField} .piecesList.${this.discClass}`);
+    this.canBearOff = false;
     this.onBar = false;
-    this.canDisbar = [];
-    this.disbarOptions = [];
     this.piecesBornOff = 0;
     this.occupiedPoints = [];
     this.legalPoints = [];
     this.hasRolled = false;
+    this.occupiedPoints = [];
+    this.legalPoints = [];
   }
 
   startTurn() {
       if (this.hasRolled) {
+        this.checkCanBearOff();
         this.checkLegalMoves();
-        $('.clickable').on('click', this.getPiece);
+        $('.clickable.piece').on('click', this.getPiece);
       }
   }
   
@@ -30,7 +33,6 @@ class Player {
           this.occupiedPoints.push(gameManager.points[i]);
         }
       }
-      console.log('occupied points: ', this.occupiedPoints);
       for(let i = 0; i < this.occupiedPoints.length; i++) {
         this.legalPoints.push(this.checkCanMove(this.occupiedPoints[i]));
       }
@@ -38,14 +40,18 @@ class Player {
         console.log('No legal moves, player must forfeit turn');
         gameManager.switchPlayer();
       }
-      for (let i = 0; i < this.legalPoints.length; i++) {
-        if(this.legalPoints[i]) {
-          $(`#${this.occupiedPoints[i]} .piece`).addClass('clickable');
-        }
+      this.makeClickable();
+    }
+  }
+
+  makeClickable() {
+    for (let i = 0; i < this.legalPoints.length; i++) {
+      if(this.legalPoints[i]) {
+        // NOTE this will be the place to add a class to change how mobile discs look
+        $(`#${this.occupiedPoints[i]} .piece`).addClass('clickable');
       }
     }
   }
-}
 
   checkCanMove(startPoint) {
     let startIndex = gameManager.points.findIndex(point => point === startPoint);
@@ -56,17 +62,40 @@ class Player {
           return true;
         }
       } return false;
+  }
+
+  checkCanBearOff() {
+    if (this.$homeField.length === 15 - this.piecesBornOff) {
+      this.canBearOff = true;
+    } else {
+      this.canBearOff = false;
     }
-  
+
+    if(this.canBearOff) {
+      console.log('go ahead and bear off');
+      // TODO think about how this works
+    } else {
+      console.log('cannot bear off yet');
+    }
+  }
 
   getPiece(e) {
+    $('.piece').removeClass('clickable');
+    console.log($(e.target));
+    $(e.target).addClass('selected');
     gameManager.$selectedPiece = $(e.target);
-    $('.point').on('click', gameManager.checkPermittedDistance);
+    $('.selected').on('click', function(){
+      $(e.target).removeClass('selected');
+      gameManager.currentPlayer.makeClickable();
+    });
+
+
+    $('div').on('click', gameManager.checkPermittedDistance);
   }
 }
 
-const player1 = new Player('player1');
-const player2 = new Player('player2');
+const player1 = new Player('player1', '#home .left');
+const player2 = new Player('player2', '#home .right');
 
 
 const gameManager = {
@@ -125,7 +154,13 @@ const gameManager = {
     } 
   },
   checkPermittedDistance(e) {
-    gameManager.$selectedPoint = $(e.target).siblings('.piecesList');
+    if($(e.target).hasClass('.piece')) {
+      gameManager.$selectedPoint = $(e.target).parent();
+      console.log('target: ', $(e.target));
+      console.log('target parent: ', gameManager.$selectedPoint);
+    } else {
+      gameManager.$selectedPoint = $(e.target).siblings('.piecesList');
+    }
     const start = gameManager.$selectedPiece.parent().parent().attr('id');
     const target = gameManager.$selectedPoint.parent().attr('id');
 
@@ -152,9 +187,14 @@ const gameManager = {
   movePiece(usedResult) {
     gameManager.dieResults.splice(usedResult, 1);
     gameManager.$selectedPoint.append(gameManager.$selectedPiece);
+    gameManager.$selectedPiece.removeClass('selected');
     if (gameManager.dieResults.length === 0) {
       gameManager.switchPlayer();
     }
+    if(!$('#barredPieces .piece').hasClass(gameManager.currentPlayer.discClass)) {
+      gameManager.currentPlayer.onBar = false;
+    }
+    gameManager.currentPlayer.checkCanBearOff();
     gameManager.currentPlayer.checkLegalMoves();    
   },
   switchPlayer() {
