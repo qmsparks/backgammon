@@ -7,11 +7,14 @@ class Player {
     this.piecesBornOff = 0;
     this.occupiedPoints = [];
     this.legalPoints = [];
+    this.hasRolled = false;
   }
 
   startTurn() {
-    this.checkLegalMoves();
-    $('.clickable').on('click', this.getPiece);
+      if (this.hasRolled) {
+        this.checkLegalMoves();
+        $('.clickable').on('click', this.getPiece);
+      }
   }
   
   checkLegalMoves() {
@@ -29,16 +32,12 @@ class Player {
       }
       console.log('occupied points: ', this.occupiedPoints);
       for(let i = 0; i < this.occupiedPoints.length; i++) {
-        // NOTE okay so this is where stuff is starting to go wrong for me
         this.legalPoints.push(this.checkCanMove(this.occupiedPoints[i]));
       }
-      console.log('theoretically legal points: ', this.legalPoints);
-      if(!this.legalPoints.includes(true)) {
+      if(gameManager.dieResults.length > 0 && !this.legalPoints.includes(true)) {
         console.log('No legal moves, player must forfeit turn');
         gameManager.switchPlayer();
       }
-  
-      // console.log('theoreticaly legal points: ', this.legalPoints);
       for (let i = 0; i < this.legalPoints.length; i++) {
         if(this.legalPoints[i]) {
           $(`#${this.occupiedPoints[i]} .piece`).addClass('clickable');
@@ -46,29 +45,19 @@ class Player {
       }
     }
   }
+}
 
   checkCanMove(startPoint) {
     let startIndex = gameManager.points.findIndex(point => point === startPoint);
-    // console.log('start index of current piece: ', startIndex);
-    // const legalTargetIndices = [];
     for (let i = 0; i < gameManager.points.length; i++) {
-      // console.log(`comparing start index(${startIndex}) against potential target index(${i})`);
-      if ($(`#${gameManager.points[i]} ul`).hasClass(this.discClass) || $(`#${gameManager.points[i]} ul`).length < 2) {
+
+      if ($(`#${gameManager.points[i]} .piece`).hasClass(this.discClass) || $(`#${gameManager.points[i]} .piece`).length < 2) 
         if (gameManager.dieResults.includes(i - startIndex)) {
-          // this is a legal move
-          // console.log('this distance: ', i-startIndex);
-          // legalTargetIndices.push(i);
-          // console.log('starting point: ', startPoint);
-          // console.log('legal target indices: ', legalTargetIndices);
           return true;
-        } else {
-          return false;
         }
-      } else {
-        return false;
-      }
+      } return false;
     }
-  }
+  
 
   getPiece(e) {
     gameManager.$selectedPiece = $(e.target);
@@ -169,6 +158,8 @@ const gameManager = {
     gameManager.currentPlayer.checkLegalMoves();    
   },
   switchPlayer() {
+    player1.hasRolled = false;
+    player2.hasRolled = false;
     gameManager.points.reverse();
     if(gameManager.currentPlayer === player1) {
       gameManager.currentPlayer = player2;
@@ -176,9 +167,11 @@ const gameManager = {
     } else {
       gameManager.currentPlayer = player1;
       gameManager.currentOpponent = player2;
-    }
-  },
+  } 
+  console.log('now playing: ', gameManager.currentPlayer);
+},
   rollDice() {
+    console.log('start turn');
     while(gameManager.dieResults.length < 2) {
       gameManager.dieResults.push(Math.ceil(Math.random() * 6));
     }
@@ -188,6 +181,7 @@ const gameManager = {
       }
     }
       console.log(gameManager.dieResults);
+      gameManager.currentPlayer.hasRolled = true;
       gameManager.currentPlayer.startTurn();
     }
 }
