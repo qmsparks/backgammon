@@ -10,35 +10,64 @@ class Player {
   }
 
   startTurn() {
-    if (this.onBar) {
-      $(`.piecesList .piece.${this.discClass}`).removeClass('clickable');
-    }
+    this.checkLegalMoves();
+    $('.clickable').on('click', this.getPiece);
+  }
+  
+  checkLegalMoves() {
+    $('.piece').removeClass('clickable');
     this.occupiedPoints = [];
     this.legalPoints = [];
-    for (let i = 0; i < gameManager.points.length; i++) {
-      if($(`#${gameManager.points[i]} .piece`).hasClass(this.discClass)) {
-        this.occupiedPoints.push(gameManager.points[i]);
+
+    if (this.onBar) {
+      $(`#barredPieces .${this.discClass}`).addClass('clickable');
+    } else {
+      for (let i = 0; i < gameManager.points.length; i++) {
+        if($(`#${gameManager.points[i]} .piece`).hasClass(this.discClass)) {
+          this.occupiedPoints.push(gameManager.points[i]);
+        }
+      }
+      console.log('occupied points: ', this.occupiedPoints);
+      for(let i = 0; i < this.occupiedPoints.length; i++) {
+        // NOTE okay so this is where stuff is starting to go wrong for me
+        this.legalPoints.push(this.checkCanMove(this.occupiedPoints[i]));
+      }
+      console.log('theoretically legal points: ', this.legalPoints);
+      if(!this.legalPoints.includes(true)) {
+        console.log('No legal moves, player must forfeit turn');
+        gameManager.switchPlayer();
+      }
+  
+      // console.log('theoreticaly legal points: ', this.legalPoints);
+      for (let i = 0; i < this.legalPoints.length; i++) {
+        if(this.legalPoints[i]) {
+          $(`#${this.occupiedPoints[i]} .piece`).addClass('clickable');
+        }
       }
     }
-    for(let i = 0; i < this.occupiedPoints.length; i++) {
-      this.legalPoints.push(this.checkCanMove(this.occupiedPoints[i]));
-    }
-    
-    if(!this.legalPoints.includes(true)) {
-      console.log('No legal moves, player must forfeit turn');
-      gameManager.switchPlayer();
-    }
-    $('.clickable').on('click', this.getPiece);
   }
 
   checkCanMove(startPoint) {
     let startIndex = gameManager.points.findIndex(point => point === startPoint);
+    // console.log('start index of current piece: ', startIndex);
+    // const legalTargetIndices = [];
     for (let i = 0; i < gameManager.points.length; i++) {
-      if (gameManager.dieResults.includes(i - startIndex)) {
-        return true;
+      // console.log(`comparing start index(${startIndex}) against potential target index(${i})`);
+      if ($(`#${gameManager.points[i]} ul`).hasClass(this.discClass) || $(`#${gameManager.points[i]} ul`).length < 2) {
+        if (gameManager.dieResults.includes(i - startIndex)) {
+          // this is a legal move
+          // console.log('this distance: ', i-startIndex);
+          // legalTargetIndices.push(i);
+          // console.log('starting point: ', startPoint);
+          // console.log('legal target indices: ', legalTargetIndices);
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
       }
     }
-    return false;
   }
 
   getPiece(e) {
@@ -103,7 +132,7 @@ const gameManager = {
 
   populateBoard(object) {
     for (let i = 0; i < object.number; i++) {
-      $(`${object.point} > .piecesList`).append($(`<li class="piece clickable ${object.class}" />`));
+      $(`${object.point} > .piecesList`).append($(`<li class="piece ${object.class}" />`));
     } 
   },
   checkPermittedDistance(e) {
@@ -134,17 +163,10 @@ const gameManager = {
   movePiece(usedResult) {
     gameManager.dieResults.splice(usedResult, 1);
     gameManager.$selectedPoint.append(gameManager.$selectedPiece);
-    if(!$('#barredPieces').children().hasClass(`${gameManager.currentPlayer.discClass}`)) {
-      gameManager.currentPlayer.onBar = false;
-      $(`.${gameManager.currentPlayer.discClass}`).addClass('clickable');
-    } else {
-      $(`.piecesList .piece.${gameManager.currentPlayer.discClass}`).removeClass('clickable');
-    }
-    
-
     if (gameManager.dieResults.length === 0) {
       gameManager.switchPlayer();
     }
+    gameManager.currentPlayer.checkLegalMoves();    
   },
   switchPlayer() {
     gameManager.points.reverse();
