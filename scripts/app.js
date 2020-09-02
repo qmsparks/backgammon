@@ -9,46 +9,15 @@ class Player {
 
   startTurn() {
     if (this.onBar) {
-      this.addressBar();
-    } 
-    $('.piece').on('click', this.getPiece);
+      $(`.piecesList .piece.${this.discClass}`).removeClass('clickable');
+    }
+    $('.clickable').on('click', this.getPiece);
   }
 
   getPiece(e) {
     gameManager.$selectedPiece = $(e.target);
     $('.point').on('click', gameManager.checkPermittedDistance);
   }
-
-  addressBar() {
-    // console.log(`${this.discClass} has a barred piece!`);
-    for (let i = 0; i < 6; i++) {
-      if ($(`#${gameManager.points[i]} ul`).children().hasClass(`${this.discClass}`) || $(`#${gameManager.points[i]} ul`).children().length < 2) {
-        this.canDisbar.push(true);
-      } else {
-        this.canDisbar.push(false);
-      }
-    }
-    if (this.canDisbar.includes(true)) {
-      // console.log(`You may be able to move!`);
-      // TODO figure out disbarring logic!
-      for (let i = 0; i < this.canDisbar.length; i++) {
-        if (this.canDisbar[i]) {
-          this.disbarOptions.push(i +1);
-        }
-        if(!this.disbarOptions.includes(gameManager.dieResults[0]) && !this.disbarOptions.includes(gameManager.dieResults[1])) {
-          console.log(`No valid moves. Player must forfeit turn`);
-          gameManager.switchPlayer();
-        } else {
-          // disbar (which may want its own function?)
-        }
-      }
-    } else {
-      console.log(`No valid moves. Player must forfeit turn`);
-      gameManager.switchPlayer();
-    }
-  }
-
- 
 }
 
 const player1 = new Player('player1');
@@ -59,42 +28,42 @@ const gameManager = {
   setUp: [
     {
       point: '#l1',
-      color: 'player1',
+      class: 'player1',
       number: 5
     },
     {
       point: '#l5',
-      color: 'player2',
+      class: 'player2',
       number: 3
     },
     {
       point: '#l7',
-      color: 'player2',
+      class: 'player2',
       number: 5
     },
     {
       point: '#l12',
-      color: 'player1',
+      class: 'player1',
       number: 2
     },
     {
       point: '#r1',
-      color: 'player2',
+      class: 'player2',
       number: 5
     },
     {
       point: '#r5',
-      color: 'player1',
+      class: 'player1',
       number: 3
     },
     {
       point: '#r7',
-      color: 'player1',
+      class: 'player1',
       number: 5
     },
     {
       point: '#r12',
-      color: 'player2',
+      class: 'player2',
       number: 2
     }
   ],
@@ -107,7 +76,7 @@ const gameManager = {
 
   populateBoard(object) {
     for (let i = 0; i < object.number; i++) {
-      $(`${object.point} > .piecesList`).append($(`<li class="piece ${object.color}" />`));
+      $(`${object.point} > .piecesList`).append($(`<li class="piece clickable ${object.class}" />`));
     } 
   },
   checkPermittedDistance(e) {
@@ -135,6 +104,10 @@ const gameManager = {
   movePiece(usedResult) {
     gameManager.dieResults.splice(usedResult, 1);
     gameManager.$selectedPoint.append(gameManager.$selectedPiece);
+    if(!$('#barredPieces').children().hasClass(`${gameManager.currentPlayer.discClass}`)) {
+      gameManager.currentPlayer.onBar = false;
+      $(`.${gameManager.currentPlayer.discClass}`).addClass('clickable');
+    }
 
     if (gameManager.dieResults.length === 0) {
       gameManager.switchPlayer();
