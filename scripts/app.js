@@ -1,7 +1,7 @@
 class Player {
   constructor(discClass, homeField) {
     this.discClass = discClass;
-    this.$homeField = $(`${homeField} .piecesList.${this.discClass}`);
+    this.$homeField = homeField;
     this.canBearOff = false;
     this.onBar = false;
     this.piecesBornOff = 0;
@@ -11,13 +11,11 @@ class Player {
     this.occupiedPoints = [];
     this.legalPoints = [];
   }
-
-  startTurn() {
-      if (this.hasRolled) {
-        this.checkCanBearOff();
-        this.checkLegalMoves();
-        $('.clickable.piece').on('click', this.getPiece);
-      }
+takeTurn() {
+    if (this.hasRolled) {
+      this.checkCanBearOff();
+      this.checkLegalMoves();
+    }
   }
   
   checkLegalMoves() {
@@ -40,17 +38,15 @@ class Player {
         console.log('No legal moves, player must forfeit turn');
         gameManager.switchPlayer();
       }
-      this.makeClickable();
-    }
-  }
 
-  makeClickable() {
-    for (let i = 0; i < this.legalPoints.length; i++) {
-      if(this.legalPoints[i]) {
-        // NOTE this will be the place to add a class to change how mobile discs look
-        $(`#${this.occupiedPoints[i]} .piece`).addClass('clickable');
+      for (let i = 0; i < this.legalPoints.length; i++) {
+        if(this.legalPoints[i]) {
+          // NOTE modify appearance of mobile discs here
+          $(`#${this.occupiedPoints[i]} .piece`).addClass('clickable');
+        }
       }
     }
+    $('.clickable.piece').on('click', this.getPiece);
   }
 
   checkCanMove(startPoint) {
@@ -65,15 +61,17 @@ class Player {
   }
 
   checkCanBearOff() {
-    if (this.$homeField.length === 15 - this.piecesBornOff) {
-      this.canBearOff = true;
-    } else {
-      this.canBearOff = false;
-    }
+    // if (this.$homeField.length === 15 - this.piecesBornOff) {
+    //   this.canBearOff = true;
+    // } else {
+    //   this.canBearOff = false;
+    // }
 
     if(this.canBearOff) {
       console.log('go ahead and bear off');
       // TODO think about how this works
+      $()
+
     } else {
       console.log('cannot bear off yet');
     }
@@ -81,21 +79,14 @@ class Player {
 
   getPiece(e) {
     $('.piece').removeClass('clickable');
-    console.log($(e.target));
     $(e.target).addClass('selected');
-    gameManager.$selectedPiece = $(e.target);
-    $('.selected').on('click', function(){
-      $(e.target).removeClass('selected');
-      gameManager.currentPlayer.makeClickable();
-    });
-
-
-    $('div').on('click', gameManager.checkPermittedDistance);
+    $('.point').on('click', gameManager.checkPermittedDistance);
+    // TODO still gotta figure out how to make it possible to move by clicking the pieces occupying a bar
   }
 }
 
-const player1 = new Player('player1', '#home .left');
-const player2 = new Player('player2', '#home .right');
+const player1 = new Player('player1', '#player1home');
+const player2 = new Player('player2', '#player2home');
 
 
 const gameManager = {
@@ -142,7 +133,6 @@ const gameManager = {
     }
   ],
   points: ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10', 'l11', 'l12', 'r12', 'r11', 'r10', 'r9', 'r8', 'r7', 'r6', 'r5', 'r4', 'r3', 'r2', 'r1'],
-  $selectedPiece: null,
   $selectedPoint: null,
   dieResults: [],
   currentPlayer: player1,
@@ -156,12 +146,10 @@ const gameManager = {
   checkPermittedDistance(e) {
     if($(e.target).hasClass('.piece')) {
       gameManager.$selectedPoint = $(e.target).parent();
-      console.log('target: ', $(e.target));
-      console.log('target parent: ', gameManager.$selectedPoint);
     } else {
       gameManager.$selectedPoint = $(e.target).siblings('.piecesList');
     }
-    const start = gameManager.$selectedPiece.parent().parent().attr('id');
+    const start = $('.selected').parent().parent().attr('id');
     const target = gameManager.$selectedPoint.parent().attr('id');
 
     let distance = gameManager.points.findIndex(point => point === target) - gameManager.points.findIndex(point => point === start);
@@ -186,8 +174,8 @@ const gameManager = {
   },
   movePiece(usedResult) {
     gameManager.dieResults.splice(usedResult, 1);
-    gameManager.$selectedPoint.append(gameManager.$selectedPiece);
-    gameManager.$selectedPiece.removeClass('selected');
+    gameManager.$selectedPoint.append($('.selected'));
+    $('.selected').toggleClass('selected');
     if (gameManager.dieResults.length === 0) {
       gameManager.switchPlayer();
     }
@@ -212,6 +200,7 @@ const gameManager = {
 },
   rollDice() {
     console.log('start turn');
+    gameManager.dieResults = [];
     while(gameManager.dieResults.length < 2) {
       gameManager.dieResults.push(Math.ceil(Math.random() * 6));
     }
@@ -222,7 +211,7 @@ const gameManager = {
     }
       console.log(gameManager.dieResults);
       gameManager.currentPlayer.hasRolled = true;
-      gameManager.currentPlayer.startTurn();
+      gameManager.currentPlayer.takeTurn();
     }
 }
 

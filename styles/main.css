@@ -25,6 +25,11 @@ body {
 }
 
 button {
+  align-self: flex-end;
+  /* margin: 0 0 100px; */
+}
+
+.freedom {
   align-self: flex-start;
 }
 
@@ -122,6 +127,7 @@ li{
   border-radius: 50%;
   border: 1px solid black;
   z-index: 0;
+  opacity: .7;
 }
 
 .point {
@@ -130,4 +136,13 @@ li{
 
 .selected {
   border: 2px solid gold;
+  opacity: 1;
+}
+
+.clickable {
+  opacity: 1;
+}
+
+.legalTarget {
+  outline-color: gold;
 }
