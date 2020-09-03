@@ -159,7 +159,7 @@ const gameManager = {
       number: 2
     }
   ],
-  points: ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10', 'l11', 'l12', 'r12', 'r11', 'r10', 'r9', 'r8', 'r7', 'r6', 'r5', 'r4', 'r3', 'r2', 'r1', 'freedom'],
+  points: ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10', 'l11', 'l12', 'r12', 'r11', 'r10', 'r9', 'r8', 'r7', 'r6', 'r5', 'r4', 'r3', 'r2', 'r1'],
   $selectedPiece: null,
   selectedPieceIndex: null,
   $selectedPoint: null,
@@ -180,14 +180,11 @@ const gameManager = {
 
     // Normal movement to another point
     if($(e.target).hasClass('point')) {
-      console.log('second click target: ', $(e.target));
       gameManager.$selectedPoint = $(e.target).siblings('.piecesList');
       const target = gameManager.$selectedPoint.parent().attr('id');
-      let distance = gameManager.points.findIndex(point => point === target) - gameManager.points.findIndex(point => point === this.selectedPieceIndex);
-
-      // NOTE okay it's here in the distance where things are getting screwy
-      console.log('legal distance: ', distance);
-  
+      let targetIndex = gameManager.points.findIndex(point => point === target);
+      let distance = targetIndex - gameManager.selectedPieceIndex;
+ 
       if(gameManager.dieResults.includes(distance)) {
   
         let usedResult = gameManager.dieResults.findIndex(number => number === distance);
