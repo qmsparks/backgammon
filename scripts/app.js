@@ -62,18 +62,25 @@ class Player {
   
     checkCanBearOff() {  
     // if all of a player's pieces that are still on the board are in their home field, then bearing off is legal
+    const piecesinHomeField = this.homeField.children().children('.piecesList').children(`.${this.discClass}`).length;
+    console.log(piecesinHomeField);
 
-    if (this.homeField.children().length === 15 - this.piecesBornOff) {
+    if (piecesinHomeField === 15 - this.piecesBornOff) {
       this.canBearOff = true;
     }
   }
 
   getPiece(e) {
+
+    // TODO reconfigure this click event so it reacts differently based on if you click a point or off the board
+    // maybe just add a 'target' class to everybody that needs one?
     gameManager.$selectedPiece = $(e.target);
-    $('div').on('click', gameManager.checkPermittedDistance);
+    $('.point').on('click', gameManager.checkPermittedDistance);
   }
 
   attemptBearOff() {
+    const bearOffIndex = gameManager.points.length - 1;
+    console.log(bearOffIndex);
     let highestOccupiedIndex = 0;
     let highestNecessaryRoll = 0;
 
@@ -90,7 +97,20 @@ class Player {
       }
     });
     console.log(gameManager.dieResults);
-    $('#freedom').append(gameManager.$selectedPiece);
+    
+    // NOTE okay somehow not getting the selected piece index here?
+    let distance = bearOffIndex - gameManager.selectedPieceIndex;
+    console.log(distance);
+
+    if(gameManager.dieResults.includes(distance)) {
+      $('#freedom').append(gameManager.$selectedPiece);
+      let usedResult = gameManager.dieResults.findIndex(number => number === distance);
+      gameManager.dieResults.splice(usedResult, 1);
+    }
+
+    // TODO gotta make sure this still follow general die rules
+    // and then remove the used roll
+    // but hot damn!
   }
 
 }
@@ -144,6 +164,7 @@ const gameManager = {
   ],
   points: ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10', 'l11', 'l12', 'r12', 'r11', 'r10', 'r9', 'r8', 'r7', 'r6', 'r5', 'r4', 'r3', 'r2', 'r1', 'freedom'],
   $selectedPiece: null,
+  selectedPieceIndex: null,
   $selectedPoint: null,
   dieResults: [],
   currentPlayer: player1,
@@ -155,21 +176,27 @@ const gameManager = {
     } 
   },
   checkPermittedDistance(e) {
+    // console.log('second click target: ', $(e.target));
+    let startPoint = gameManager.$selectedPiece.parent().parent().attr('id');
+    gameManager.selectedPieceIndex = gameManager.points.findIndex(point => point === startPoint);
+
+    // why.....does this fire so many times?
+    // oh because the click event is just on divs now
+
+    console.log('grab selectedPieceIndex: ', gameManager.selectedPieceIndex)
     // if the player has clicked on the bearing-off div, and it has already been confirmed, then we'll see if it's legal
+
     if($(e.target).attr('id') === 'freedom' &&  gameManager.currentPlayer.canBearOff) {
       console.log('attempting to bear off');
       gameManager.currentPlayer.attemptBearOff();
     } else if($(e.target).hasClass('point')) {
     gameManager.$selectedPoint = $(e.target).siblings('.piecesList');
-    const start = gameManager.$selectedPiece.parent().parent().attr('id');
     const target = gameManager.$selectedPoint.parent().attr('id');
-
-    let distance = gameManager.points.findIndex(point => point === target) - gameManager.points.findIndex(point => point === start);
+    let distance = gameManager.points.findIndex(point => point === target) - gameManager.points.findIndex(point => point === this.selectedPieceIndex);
 
     if(gameManager.dieResults.includes(distance)) {
-      let usedResult = gameManager.dieResults.findIndex(function(number){
-        return number === distance;
-      });
+
+      let usedResult = gameManager.dieResults.findIndex(number => number === distance);
       gameManager.checkValidMove(usedResult);
     }
   
