@@ -33,7 +33,6 @@ class Player {
           this.occupiedPoints.push(gameManager.points[i]);
         }
       }
-      console.log('occupied points: ', this.occupiedPoints);
       for(let i = 0; i < this.occupiedPoints.length; i++) {
         this.legalPoints.push(this.checkCanMove(this.occupiedPoints[i]));
       }
@@ -63,7 +62,6 @@ class Player {
     checkCanBearOff() {  
     // if all of a player's pieces that are still on the board are in their home field, then bearing off is legal
     const piecesinHomeField = this.homeField.children().children('.piecesList').children(`.${this.discClass}`).length;
-    console.log(piecesinHomeField);
 
     if (piecesinHomeField === 15 - this.piecesBornOff) {
       this.canBearOff = true;
@@ -76,10 +74,10 @@ class Player {
   }
 
   attemptBearOff() {
-    
-    let bearOffPoints = this.homeField.children().children('.piecesList');
-    console.log(bearOffPoints);
 
+    // if(gameManager.selectedPieceIndex !== -1) 
+    // NOTE okay now this whole thing is firing a billion times for one click? 
+    let bearOffPoints = this.homeField.children().children('.piecesList');
     let highestOccupiedIndex = 0;
     let highestNecessaryRoll = 0;
 
@@ -91,25 +89,32 @@ class Player {
         }
       } 
     }
-
-    console.log(highestOccupiedIndex);
     highestNecessaryRoll = highestOccupiedIndex + 1;
-    console.log(highestNecessaryRoll);
 
     gameManager.dieResults.forEach(function(result, index) {
       if(result > highestNecessaryRoll) {
         gameManager.dieResults[index] = highestNecessaryRoll;
       }
     });
-    console.log(gameManager.dieResults);
 
-    console.log('selected piece index: ', gameManager.selectedPieceIndex);
+    // okay gotta make sure that i'm getting the home field equivalent of the selected piece's index
 
-    if (gameManager.dieResults.includes (24 - gameManager.selectedPieceIndex)) {
-      $('#freedom').append(gameManager.$selectedPiece);
+    if(gameManager.selectedPieceIndex > 5) {
+      gameManager.selectedPieceIndex = 23 - gameManager.selectedPieceIndex;
     }
 
-    // TODO gotta  remove the used roll
+    let usedResult = gameManager.selectedPieceIndex + 1;
+
+    let spliceIndex = gameManager.dieResults.findIndex(value => value === usedResult);
+
+    if (gameManager.dieResults.includes (usedResult)) {
+      gameManager.dieResults.splice((spliceIndex), 1);
+      $('#freedom').append(gameManager.$selectedPiece);
+      gameManager.$selectedPiece = null;
+      gameManager.selectedPieceIndex = null;
+      this.piecesBornOff++;
+      console.log(this.piecesBornOff);
+    }
   }
 
 }
@@ -175,10 +180,16 @@ const gameManager = {
     } 
   },
   checkPermittedDistance(e) {
-    let startPoint = gameManager.$selectedPiece.parent().parent().attr('id');
+    // do not know why it's trying to set this before I've done anything to call it?
+    let startPoint = null;
+    if(gameManager.$selectedPiece) {
+      startPoint = gameManager.$selectedPiece.parent().parent().attr('id');
+    }
+
+  if(gameManager.selectedPieceIndex !== gameManager.points.findIndex(point => point === startPoint)){
     gameManager.selectedPieceIndex = gameManager.points.findIndex(point => point === startPoint);
-    console.log('grab selectedPieceIndex: ', gameManager.selectedPieceIndex)
-    
+    console.log('hey do I still fire a billion times?');
+  }
 
     // Normal movement to another point
     if($(e.target).hasClass('point')) {
@@ -195,12 +206,13 @@ const gameManager = {
     } // attempting to bear piece off the board 
     else if($(e.target).attr('id') === 'freedom' &&  gameManager.currentPlayer.canBearOff) {
       console.log('attempting to bear off');
+      if(gameManager.selectedPieceIndex !== -1) {
       gameManager.currentPlayer.attemptBearOff();
+      }
     }
   },
 
   checkValidMove(usedResult) {
-    console.log('checking validity of attempted move');
     if (!gameManager.$selectedPoint.children().hasClass(`${gameManager.currentOpponent.discClass}`)) {
       gameManager.movePiece(usedResult);
     } else if (gameManager.$selectedPoint.children().length > 1) {
@@ -213,11 +225,15 @@ const gameManager = {
   },
   movePiece(usedResult) {
     gameManager.dieResults.splice(usedResult, 1);
+    console.log(this.dieResults);
     gameManager.$selectedPoint.append(gameManager.$selectedPiece);
+    gameManager.$selectedPiece = null;
+
     if (gameManager.dieResults.length === 0) {
       gameManager.switchPlayer();
-    }
-    gameManager.currentPlayer.checkLegalMoves();    
+    } else {
+    gameManager.currentPlayer.checkLegalMoves();  
+    }  
   },
   switchPlayer() {
     player1.hasRolled = false;
@@ -230,11 +246,9 @@ const gameManager = {
       gameManager.currentPlayer = player1;
       gameManager.currentOpponent = player2;
   } 
-  console.log('now playing: ', gameManager.currentPlayer);
 },
   rollDice() {
-    this.dieResults = [];
-    console.log('start turn');
+    gameManager.dieResults = [];
     while(gameManager.dieResults.length < 2) {
       gameManager.dieResults.push(Math.ceil(Math.random() * 6));
     }
