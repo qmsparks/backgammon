@@ -71,11 +71,8 @@ class Player {
   }
 
   getPiece(e) {
-
-    // TODO reconfigure this click event so it reacts differently based on if you click a point or off the board
-    // maybe just add a 'target' class to everybody that needs one?
     gameManager.$selectedPiece = $(e.target);
-    $('.point').on('click', gameManager.checkPermittedDistance);
+    $('.target').on('click', gameManager.checkPermittedDistance);
   }
 
   attemptBearOff() {
@@ -176,33 +173,35 @@ const gameManager = {
     } 
   },
   checkPermittedDistance(e) {
-    // console.log('second click target: ', $(e.target));
     let startPoint = gameManager.$selectedPiece.parent().parent().attr('id');
     gameManager.selectedPieceIndex = gameManager.points.findIndex(point => point === startPoint);
-
-    // why.....does this fire so many times?
-    // oh because the click event is just on divs now
-
     console.log('grab selectedPieceIndex: ', gameManager.selectedPieceIndex)
-    // if the player has clicked on the bearing-off div, and it has already been confirmed, then we'll see if it's legal
+    
 
-    if($(e.target).attr('id') === 'freedom' &&  gameManager.currentPlayer.canBearOff) {
+    // Normal movement to another point
+    if($(e.target).hasClass('point')) {
+      console.log('second click target: ', $(e.target));
+      gameManager.$selectedPoint = $(e.target).siblings('.piecesList');
+      const target = gameManager.$selectedPoint.parent().attr('id');
+      let distance = gameManager.points.findIndex(point => point === target) - gameManager.points.findIndex(point => point === this.selectedPieceIndex);
+
+      // NOTE okay it's here in the distance where things are getting screwy
+      console.log('legal distance: ', distance);
+  
+      if(gameManager.dieResults.includes(distance)) {
+  
+        let usedResult = gameManager.dieResults.findIndex(number => number === distance);
+        gameManager.checkValidMove(usedResult);
+      }
+    } // attempting to bear piece off the board 
+    else if($(e.target).attr('id') === 'freedom' &&  gameManager.currentPlayer.canBearOff) {
       console.log('attempting to bear off');
       gameManager.currentPlayer.attemptBearOff();
-    } else if($(e.target).hasClass('point')) {
-    gameManager.$selectedPoint = $(e.target).siblings('.piecesList');
-    const target = gameManager.$selectedPoint.parent().attr('id');
-    let distance = gameManager.points.findIndex(point => point === target) - gameManager.points.findIndex(point => point === this.selectedPieceIndex);
-
-    if(gameManager.dieResults.includes(distance)) {
-
-      let usedResult = gameManager.dieResults.findIndex(number => number === distance);
-      gameManager.checkValidMove(usedResult);
     }
-  
-  }
   },
+
   checkValidMove(usedResult) {
+    console.log('checking validity of attempted move');
     if (!gameManager.$selectedPoint.children().hasClass(`${gameManager.currentOpponent.discClass}`)) {
       gameManager.movePiece(usedResult);
     } else if (gameManager.$selectedPoint.children().length > 1) {
