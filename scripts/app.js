@@ -13,40 +13,67 @@ class Player {
   }
 
   startTurn() {
-      if (this.hasRolled) {
-        this.checkCanBearOff();
-        this.checkLegalMoves();
-        $('.clickable').on('click', this.getPiece);
-      }
+
+    // once the player has rolled:
+    // first check if there are any legal moves available to them
+
+
+    if(gameManager.currentPlayer.hasRolled) {
+      gameManager.currentPlayer.checkLegalMoves();
+    }
+    gameManager.currentPlayer.checkCanBearOff();
+
+    $('li.clickable').on('click', gameManager.currentPlayer.getPiece);
+
+
+      // if (gameManager.currentPlayer.hasRolled) {
+      //   gameManager.currentPlayer.checkCanBearOff();
+
+      //   if(gameManager.$selectedPiece) {
+      //     gameManager.currentPlayer.checkLegalMoves();
+      //   }
+      // }
+      // $('li.clickable').on('click', gameManager.currentPlayer.getPiece);
   }
   
   checkLegalMoves() {
-    $('.piece').removeClass('clickable');
-    this.occupiedPoints = [];
-    this.legalPoints = [];
+    console.log('checking to see if player has any pieces on the bar');
+    if ($('#barredPieces li').hasClass(gameManager.currentPlayer.discClass)) {
+      gameManager.currentPlayer.onBar = true;
+    } else {
+      gameManager.currentPlayer.onBar = false;
+    }
 
-    if (this.onBar) {
-      $(`#barredPieces .${this.discClass}`).addClass('clickable');
+    console.log('removing clickable class from all pieces');
+    $('.piece').removeClass('clickable');
+    gameManager.currentPlayer.occupiedPoints = [];
+    gameManager.currentPlayer.legalPoints = [];
+
+    if (gameManager.currentPlayer.onBar) {
+      console.log('applying clickable class to barred pieces')
+      $(`#barredPieces .${gameManager.currentPlayer.discClass}`).addClass('clickable');
     } else {
       for (let i = 0; i < gameManager.points.length; i++) {
-        if($(`#${gameManager.points[i]} .piece`).hasClass(this.discClass)) {
-          this.occupiedPoints.push(gameManager.points[i]);
+        if($(`#${gameManager.points[i]} .piece`).hasClass(gameManager.currentPlayer.discClass)) {
+          gameManager.currentPlayer.occupiedPoints.push(gameManager.points[i]);
         }
       }
-      for(let i = 0; i < this.occupiedPoints.length; i++) {
-        this.legalPoints.push(this.checkCanMove(this.occupiedPoints[i]));
+      for(let i = 0; i < gameManager.currentPlayer.occupiedPoints.length; i++) {
+        gameManager.currentPlayer.legalPoints.push(gameManager.currentPlayer.checkCanMove(gameManager.currentPlayer.occupiedPoints[i]));
       }
-      if(gameManager.dieResults.length > 0 && !this.legalPoints.includes(true)) {
+      if(gameManager.dieResults.length > 0 && !gameManager.currentPlayer.legalPoints.includes(true)) {
         console.log('No legal moves, player must forfeit turn');
         gameManager.switchPlayer();
       }
-      for (let i = 0; i < this.legalPoints.length; i++) {
-        if(this.legalPoints[i]) {
-          $(`#${this.occupiedPoints[i]} .piece`).addClass('clickable');
+      for (let i = 0; i < gameManager.currentPlayer.legalPoints.length; i++) {
+        if(gameManager.currentPlayer.legalPoints[i]) {
+          console.log('applying clickable class to legal pieces on the field');
+          $(`#${gameManager.currentPlayer.occupiedPoints[i]} .piece`).addClass('clickable');
         }
       }
     }
 }
+
 
   checkCanMove(startPoint) {
     let startIndex = gameManager.points.findIndex(point => point === startPoint);
@@ -60,11 +87,15 @@ class Player {
     }
   
     checkCanBearOff() {  
+      console.log('checking if player can bear off');
+      // NOTE may need to add something in here about checking move legality? 
     // if all of a player's pieces that are still on the board are in their home field, then bearing off is legal
-    const piecesinHomeField = this.homeField.children().children('.piecesList').children(`.${this.discClass}`).length;
+    const piecesinHomeField = gameManager.currentPlayer.homeField.children().children('.piecesList').children(`.${gameManager.currentPlayer.discClass}`).length;
 
-    if (piecesinHomeField === 15 - this.piecesBornOff) {
-      this.canBearOff = true;
+    if (piecesinHomeField === 15 - gameManager.currentPlayer.piecesBornOff) {
+      gameManager.currentPlayer.canBearOff = true;
+
+      // TODO okay this might actually need to be where I handle the legality of bearing off, since it's being....weird
     }
   }
 
@@ -75,9 +106,7 @@ class Player {
 
   attemptBearOff() {
 
-    // if(gameManager.selectedPieceIndex !== -1) 
-    // NOTE okay now this whole thing is firing a billion times for one click? 
-    let bearOffPoints = this.homeField.children().children('.piecesList');
+    let bearOffPoints = gameManager.currentPlayer.homeField.children().children('.piecesList');
     let highestOccupiedIndex = 0;
     let highestNecessaryRoll = 0;
 
@@ -97,7 +126,8 @@ class Player {
       }
     });
 
-    // okay gotta make sure that i'm getting the home field equivalent of the selected piece's index
+    // make sure that the program is getting the home field equivalent of the selected piece's index
+
 
     if(gameManager.selectedPieceIndex > 5) {
       gameManager.selectedPieceIndex = 23 - gameManager.selectedPieceIndex;
@@ -112,8 +142,8 @@ class Player {
       $('#freedom').append(gameManager.$selectedPiece);
       gameManager.$selectedPiece = null;
       gameManager.selectedPieceIndex = null;
-      this.piecesBornOff++;
-      console.log(this.piecesBornOff);
+      gameManager.currentPlayer.piecesBornOff++;
+      console.log(gameManager.currentPlayer.piecesBornOff);
     }
   }
 
@@ -180,11 +210,15 @@ const gameManager = {
     } 
   },
   checkPermittedDistance(e) {
-    // do not know why it's trying to set this before I've done anything to call it?
     let startPoint = null;
-    if(gameManager.$selectedPiece) {
+
+    // if (!gameManager.$selectedPiece.hasClass('clickable')) {
+    //   gameManager.$selectedPiece = null;
+    // }
+
+    if((gameManager.$selectedPiece) && gameManager.$selectedPiece.hasClass('clickable')) {
       startPoint = gameManager.$selectedPiece.parent().parent().attr('id');
-    }
+    
 
   if(gameManager.selectedPieceIndex !== gameManager.points.findIndex(point => point === startPoint)){
     gameManager.selectedPieceIndex = gameManager.points.findIndex(point => point === startPoint);
@@ -210,6 +244,7 @@ const gameManager = {
       gameManager.currentPlayer.attemptBearOff();
       }
     }
+  }
   },
 
   checkValidMove(usedResult) {
@@ -219,7 +254,7 @@ const gameManager = {
       console.log(`Illegal move`);
     } else {
       $('#barredPieces').append(gameManager.$selectedPoint.children().eq(0));
-      gameManager.currentOpponent.onBar = true;
+      // gameManager.currentOpponent.onBar = true;
       gameManager.movePiece(usedResult);
     }
   },
@@ -227,12 +262,11 @@ const gameManager = {
     gameManager.dieResults.splice(usedResult, 1);
     console.log(this.dieResults);
     gameManager.$selectedPoint.append(gameManager.$selectedPiece);
-    gameManager.$selectedPiece = null;
+    gameManager.currentPlayer.checkLegalMoves();  
+    
 
     if (gameManager.dieResults.length === 0) {
       gameManager.switchPlayer();
-    } else {
-    gameManager.currentPlayer.checkLegalMoves();  
     }  
   },
   switchPlayer() {
