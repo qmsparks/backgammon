@@ -1,6 +1,7 @@
 class Player {
-  constructor(discClass) {
+  constructor(discClass, homeField) {
     this.discClass = discClass;
+    this.homeField = homeField;
     this.onBar = false;
     this.canDisbar = [];
     this.disbarOptions = [];
@@ -8,10 +9,12 @@ class Player {
     this.occupiedPoints = [];
     this.legalPoints = [];
     this.hasRolled = false;
+    this.canBearOff = false;
   }
 
   startTurn() {
       if (this.hasRolled) {
+        this.checkCanBearOff();
         this.checkLegalMoves();
         $('.clickable').on('click', this.getPiece);
       }
@@ -44,7 +47,6 @@ class Player {
         }
       }
     }
-  }
 }
 
   checkCanMove(startPoint) {
@@ -58,15 +60,43 @@ class Player {
       } return false;
     }
   
+    checkCanBearOff() {  
+    // if all of a player's pieces that are still on the board are in their home field, then bearing off is legal
+
+    if (this.homeField.children().length === 15 - this.piecesBornOff) {
+      this.canBearOff = true;
+    }
+  }
 
   getPiece(e) {
     gameManager.$selectedPiece = $(e.target);
-    $('.point').on('click', gameManager.checkPermittedDistance);
+    $('div').on('click', gameManager.checkPermittedDistance);
   }
+
+  attemptBearOff() {
+    let highestOccupiedIndex = 0;
+    let highestNecessaryRoll = 0;
+
+    this.occupiedPoints.forEach(function(point, index) {
+      if (index > highestOccupiedIndex) {
+        highestOccupiedIndex = index;
+      }
+    });
+    highestNecessaryRoll = highestOccupiedIndex + 1;
+
+    gameManager.dieResults.forEach(function(result, index) {
+      if(result > highestNecessaryRoll) {
+        gameManager.dieResults[index] = highestNecessaryRoll;
+      }
+    });
+    console.log(gameManager.dieResults);
+    $('#freedom').append(gameManager.$selectedPiece);
+  }
+
 }
 
-const player1 = new Player('player1');
-const player2 = new Player('player2');
+const player1 = new Player('player1', $('#home .points.right'));
+const player2 = new Player('player2', $('#home .points.left'));
 
 
 const gameManager = {
@@ -112,7 +142,7 @@ const gameManager = {
       number: 2
     }
   ],
-  points: ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10', 'l11', 'l12', 'r12', 'r11', 'r10', 'r9', 'r8', 'r7', 'r6', 'r5', 'r4', 'r3', 'r2', 'r1'],
+  points: ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10', 'l11', 'l12', 'r12', 'r11', 'r10', 'r9', 'r8', 'r7', 'r6', 'r5', 'r4', 'r3', 'r2', 'r1', 'freedom'],
   $selectedPiece: null,
   $selectedPoint: null,
   dieResults: [],
@@ -125,6 +155,11 @@ const gameManager = {
     } 
   },
   checkPermittedDistance(e) {
+    // if the player has clicked on the bearing-off div, and it has already been confirmed, then we'll see if it's legal
+    if($(e.target).attr('id') === 'freedom' &&  gameManager.currentPlayer.canBearOff) {
+      console.log('attempting to bear off');
+      gameManager.currentPlayer.attemptBearOff();
+    } else if($(e.target).hasClass('point')) {
     gameManager.$selectedPoint = $(e.target).siblings('.piecesList');
     const start = gameManager.$selectedPiece.parent().parent().attr('id');
     const target = gameManager.$selectedPoint.parent().attr('id');
@@ -137,6 +172,8 @@ const gameManager = {
       });
       gameManager.checkValidMove(usedResult);
     }
+  
+  }
   },
   checkValidMove(usedResult) {
     if (!gameManager.$selectedPoint.children().hasClass(`${gameManager.currentOpponent.discClass}`)) {
@@ -171,6 +208,7 @@ const gameManager = {
   console.log('now playing: ', gameManager.currentPlayer);
 },
   rollDice() {
+    this.dieResults = [];
     console.log('start turn');
     while(gameManager.dieResults.length < 2) {
       gameManager.dieResults.push(Math.ceil(Math.random() * 6));
