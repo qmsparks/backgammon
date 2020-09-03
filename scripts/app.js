@@ -76,17 +76,25 @@ class Player {
   }
 
   attemptBearOff() {
-    const bearOffIndex = gameManager.points.length - 1;
-    console.log(bearOffIndex);
+    
+    let bearOffPoints = this.homeField.children().children('.piecesList');
+    console.log(bearOffPoints);
+
     let highestOccupiedIndex = 0;
     let highestNecessaryRoll = 0;
 
-    this.occupiedPoints.forEach(function(point, index) {
-      if (index > highestOccupiedIndex) {
-        highestOccupiedIndex = index;
-      }
-    });
+    // scan through all points in the home field and find the highest occupied point
+    for(let i = 0; i < bearOffPoints.length; i++) {
+      if(bearOffPoints.eq(i).children().hasClass(`${this.discClass}`)) {
+        if (i > highestOccupiedIndex) {
+          highestOccupiedIndex = i;
+        }
+      } 
+    }
+
+    console.log(highestOccupiedIndex);
     highestNecessaryRoll = highestOccupiedIndex + 1;
+    console.log(highestNecessaryRoll);
 
     gameManager.dieResults.forEach(function(result, index) {
       if(result > highestNecessaryRoll) {
@@ -94,20 +102,14 @@ class Player {
       }
     });
     console.log(gameManager.dieResults);
-    
-    // NOTE okay somehow not getting the selected piece index here?
-    let distance = bearOffIndex - gameManager.selectedPieceIndex;
-    console.log(distance);
 
-    if(gameManager.dieResults.includes(distance)) {
+    console.log('selected piece index: ', gameManager.selectedPieceIndex);
+
+    if (gameManager.dieResults.includes (24 - gameManager.selectedPieceIndex)) {
       $('#freedom').append(gameManager.$selectedPiece);
-      let usedResult = gameManager.dieResults.findIndex(number => number === distance);
-      gameManager.dieResults.splice(usedResult, 1);
     }
 
-    // TODO gotta make sure this still follow general die rules
-    // and then remove the used roll
-    // but hot damn!
+    // TODO gotta  remove the used roll
   }
 
 }
@@ -184,7 +186,7 @@ const gameManager = {
       const target = gameManager.$selectedPoint.parent().attr('id');
       let targetIndex = gameManager.points.findIndex(point => point === target);
       let distance = targetIndex - gameManager.selectedPieceIndex;
- 
+
       if(gameManager.dieResults.includes(distance)) {
   
         let usedResult = gameManager.dieResults.findIndex(number => number === distance);
