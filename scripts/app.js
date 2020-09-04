@@ -242,7 +242,7 @@ const gameManager = {
         let usedResult = gameManager.dieResults.findIndex(number => number === distance);
         gameManager.checkValidMove(usedResult);
       }
-    } 
+    } // bearing off if possible   
       else if($(e.target).attr('id') === 'freedom' &&  gameManager.currentPlayer.canBearOff) {
         gameManager.currentPlayer.bearOff();
       }
@@ -281,9 +281,7 @@ const gameManager = {
       gameManager.currentOpponent = player2;
   }
   
-  $('#currentPlayername').text('');
-  $('#currentPlayerName').text(gameManager.currentPlayer.name);
-  $('.dice').text('');
+  gameManager.resetDice()
 },
   rollDice() {
     $('.alert').remove();
@@ -306,9 +304,12 @@ const gameManager = {
       gameManager.currentPlayer.startTurn();
     },
 
-    clearDice() {
-      $('.spillover').remove();
-      $('.allDice').append(`<div class="dice ${gameManager.currentPlayer.dieClass}" />`);
+    resetDice() {
+      $('#currentPlayername').text('');
+      $('#currentPlayerName').text(gameManager.currentPlayer.name);
+      $('.dice').removeClass(gameManager.currentOpponent.discClass);
+      $('.dice').addClass(gameManager.currentPlayer.discClass);
+      $('.dice').text('');
   }
 }
 
@@ -326,8 +327,8 @@ $('#submit').on('click', function() {
   }
   gameManager.dieResults = firstRoll;
 
-  $(`.${player1.dieClass}`).text(firstRoll[0]);
-  $(`.${player2.dieClass}`).text(firstRoll[1]);
+  $(`.dice.${player1.discClass}`).text(firstRoll[0]);
+  $(`.dice.${player2.discClass}`).text(firstRoll[1]);
 
 
   if (firstRoll[0] < firstRoll[1]) {
@@ -343,5 +344,7 @@ $('#submit').on('click', function() {
   gameManager.currentPlayer.startTurn();
 });
 
+
+// TODO if I can make it visually clearer which player has this color, switch the board population into the name-submit function
 gameManager.setUp.forEach(gameManager.populateBoard);
 $('.diceWrapper').on('click', gameManager.rollDice);
