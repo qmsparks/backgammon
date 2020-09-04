@@ -346,6 +346,7 @@ const gameManager = {
 
 
 $('#submit').on('click', function() {
+  gameManager.setUp.forEach(gameManager.populateBoard);
   getPlayerNames();
   let firstRoll = [];
 
@@ -380,5 +381,4 @@ $('#submit').on('click', function() {
 
 
 // TODO if I can make it visually clearer which player has this color, switch the board population into the name-submit function
-gameManager.setUp.forEach(gameManager.populateBoard);
 $('.diceWrapper').on('click', gameManager.rollDice);

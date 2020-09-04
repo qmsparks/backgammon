@@ -5,10 +5,11 @@
   --bar: darkslategray;
   --odd: pink;
   --even: black;
+  --overlay: #dbbbff;
 
   /* piece colors */
   --player1: lightblue;
-  --player2: white;
+  --player2: plum;
 
 }
 
@@ -23,8 +24,6 @@ body {
   justify-content: center;
   align-items: center;
 }
-
-
 
 #board {
   border: 3px solid black;
@@ -142,7 +141,7 @@ li{
 #playerInformation {
   border-radius: 15px;
   padding: 50px;
-  background-color: plum;
+  background-color: var(--overlay);
   position: absolute;
   z-index: 1;
   display: flex;
@@ -160,6 +159,13 @@ li{
 
 input[type=submit] {
   margin:  0 0 10px;
+}
+
+input[type=text]#player1 {
+  background-color: var(--player1);
+}
+input[type=text]#player2 {
+  background-color: var(--player2);
 }
 
 .diceWrapper {
@@ -189,12 +195,13 @@ left: 50px;
 #currentPlayerName {
   left: 75px;
 }
+
 #victory {
   height: 80vh;
   width: 50vw;
   min-width: 515px;
   min-height: 650px;
-  background-color: plum;
+  background-color: var(--overlay);
   border-radius: 15px;
   opacity: .9;
   position: absolute;
