@@ -155,7 +155,7 @@ input[type=submit] {
   margin:  0 0 10px;
 }
 
-.allDice {
+.diceWrapper {
   align-self: flex-end;
   width: 125px;
   display: flex;
@@ -166,7 +166,7 @@ input[type=submit] {
 .dice {
   width: 45px;
   height: 45px;
-  /* display: grid; */
+  /* display: grid;  */
   border: 2px solid black;
   display: flex;
   justify-content: center;
@@ -181,14 +181,26 @@ input[type=submit] {
   background-color: var(--player2);
 }
 
-.spillover {
-  display: flex;
-  flex-direction: column-reverse;
-  height: 100px;
-  justify-content: space-between; 
+#gameInformation {
+display: none;
+position: absolute;
+top: 215px;
+left: 50px;
 }
 
-button {
-  align-self: flex-end;
-  margin: 0 0 50px;
+#currentPlayerName {
+  left: 75px;
+}
+#victory {
+  height: 80vh;
+  width: 50vw;
+  background-color: plum;
+  border-radius: 15px;
+  opacity: .9;
+  position: absolute;
+  display: flex;
+  display: none;
+  z-index: 2;
+  justify-content: center;
+  align-items: center;
 }

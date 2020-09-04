@@ -25,20 +25,18 @@ class Player {
 
 
   checkLegalMoves() {
-    console.log('checking to see if player has any pieces on the bar');
+
     if ($('#barredPieces li').hasClass(gameManager.currentPlayer.discClass)) {
       gameManager.currentPlayer.onBar = true;
     } else {
       gameManager.currentPlayer.onBar = false;
     }
 
-    console.log('removing clickable class from all pieces');
     $('.piece').removeClass('clickable');
     gameManager.currentPlayer.occupiedPoints = [];
     gameManager.currentPlayer.legalPoints = [];
 
     if (gameManager.currentPlayer.onBar) {
-      console.log('applying clickable class to barred pieces')
       $(`#barredPieces .${gameManager.currentPlayer.discClass}`).addClass('clickable');
     } else {
       for (let i = 0; i < gameManager.points.length; i++) {
@@ -50,12 +48,11 @@ class Player {
         gameManager.currentPlayer.legalPoints.push(gameManager.currentPlayer.checkCanMove(gameManager.currentPlayer.occupiedPoints[i]));
       }
       if(gameManager.dieResults.length > 0 && !gameManager.currentPlayer.legalPoints.includes(true)) {
-        console.log('No legal moves, player must forfeit turn');
+        $('#gameInformation').append('<p class="alert">No legal moves! Skip turn.</p>');
         gameManager.switchPlayer();
       }
       for (let i = 0; i < gameManager.currentPlayer.legalPoints.length; i++) {
         if(gameManager.currentPlayer.legalPoints[i]) {
-          console.log('applying clickable class to legal pieces on the field');
           $(`#${gameManager.currentPlayer.occupiedPoints[i]} .piece`).addClass('clickable');
         }
       }
@@ -75,15 +72,11 @@ class Player {
     }
   
     checkCanBearOff() {  
-      console.log('checking if player can bear off');
-      // NOTE may need to add something in here about checking move legality? 
     // if all of a player's pieces that are still on the board are in their home field, then bearing off is legal
     const piecesinHomeField = gameManager.currentPlayer.homeField.children().children('.piecesList').children(`.${gameManager.currentPlayer.discClass}`).length;
 
     if (piecesinHomeField === 15 - gameManager.currentPlayer.piecesBornOff) {
       gameManager.currentPlayer.canBearOff = true;
-
-      // TODO okay this might actually need to be where I handle the legality of bearing off, since it's being....weird
     }
   }
 
@@ -124,10 +117,8 @@ class Player {
             legalPoints.push(homePoints.eq(i));
         } 
       }
-      console.log('legalPoints: ', legalPoints);
 
       legalPoints.forEach(function(point) {
-        console.log('adding clickable class to pieces that can be borne off');
         $(point).children().addClass('clickable');
       });
 
@@ -149,7 +140,11 @@ class Player {
       gameManager.$selectedPiece = null;
       gameManager.selectedPieceIndex = null;
       gameManager.currentPlayer.piecesBornOff++;
-      console.log(gameManager.currentPlayer.piecesBornOff);
+
+    }
+    if(gameManager.currentPlayer.piecesBornOff === 15) {
+      $('#victory').append(`${gameManager.currentPlayer.name} Wins!!`);
+      $('#victory').css('display', 'flex');
     }
   }
 
@@ -163,7 +158,7 @@ const getPlayerNames = function() {
   player1.name = $('#player1').val();
   player2.name = $('#player2').val();
 
-  $('#playerInformation').hide();
+  $('#playerInformation').remove();
 }
 
 
@@ -258,7 +253,6 @@ const gameManager = {
     if (!gameManager.$selectedPoint.children().hasClass(`${gameManager.currentOpponent.discClass}`)) {
       gameManager.movePiece(usedResult);
     } else if (gameManager.$selectedPoint.children().length > 1) {
-      console.log(`Illegal move`);
     } else {
       $('#barredPieces').append(gameManager.$selectedPoint.children().eq(0));
       gameManager.movePiece(usedResult);
@@ -285,37 +279,69 @@ const gameManager = {
     } else {
       gameManager.currentPlayer = player1;
       gameManager.currentOpponent = player2;
-  } 
+  }
+  
+  $('#currentPlayername').text('');
+  $('#currentPlayerName').text(gameManager.currentPlayer.name);
+  $('.dice').text('');
 },
   rollDice() {
+    $('.alert').remove();
     gameManager.dieResults = [];
-    while(gameManager.dieResults.length < 2) {
-      gameManager.dieResults.push(Math.ceil(Math.random() * 6));
+
+    for(let i = 0; i < 2; i++) {
+      let number = Math.ceil(Math.random() * 6)
+      gameManager.dieResults.push(number);
+      $('.diceWrapper').children().eq(i).text(number);
     }
+
     if (gameManager.dieResults[0] === gameManager.dieResults[1]){
+      $('#gameInformation').append("<p class='alert'>Doubles mean double! Take 4 moves.</p>")
       while(gameManager.dieResults.length < 4) {
         gameManager.dieResults.push(gameManager.dieResults[0]);
       }
     }
-
-    $(`.${gameManager.currentPlayer.dieClass}`).text(gameManager.dieResults[0]);
-    $(`.${gameManager.currentPlayer.dieClass}`).parent().append($(`<div class="dice ${gameManager.currentPlayer.dieClass}" />`).text(gameManager.dieResults[1]));
-
-
       console.log(gameManager.dieResults);
       gameManager.currentPlayer.hasRolled = true;
       gameManager.currentPlayer.startTurn();
-    }
+    },
+
+    clearDice() {
+      $('.spillover').remove();
+      $('.allDice').append(`<div class="dice ${gameManager.currentPlayer.dieClass}" />`);
+  }
 }
 
 
+$('#submit').on('click', function() {
+  getPlayerNames();
+  let firstRoll = [];
 
-$('#submit').on('click', getPlayerNames);
+  for (let i = 0; i < 2; i++) {
+    firstRoll.push(Math.ceil(Math.random() * 6));
+    if (firstRoll[i] === firstRoll[i-1]) {
+      firstRoll.pop();
+      i--
+    }
+  }
+  gameManager.dieResults = firstRoll;
+
+  $(`.${player1.dieClass}`).text(firstRoll[0]);
+  $(`.${player2.dieClass}`).text(firstRoll[1]);
+
+
+  if (firstRoll[0] < firstRoll[1]) {
+    gameManager.currentPlayer = player2;
+    gameManager.currentOpponent = player1;
+    gameManager.points.reverse();
+  } 
+
+  $('#currentPlayerName').text(gameManager.currentPlayer.name);
+  $('#gameInformation').css('display', 'block');
+
+  gameManager.currentPlayer.hasRolled = true;
+  gameManager.currentPlayer.startTurn();
+});
 
 gameManager.setUp.forEach(gameManager.populateBoard);
-
-if (gameManager.currentPlayer === player1) {
-  $('.p1die').on('click', gameManager.rollDice);
-} else if (gameManager.currentPlayer === player2) {
-  $('.p2die').on('click', gameManager.rollDice);
-}
+$('.diceWrapper').on('click', gameManager.rollDice);

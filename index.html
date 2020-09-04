@@ -13,17 +13,25 @@
 </head>
 <body>
 
-<!-- <aside id="playerInformation">
+<aside id="playerInformation">
   <section id="inputFields">
     <label for ="player1">Player 1</label>
     <input type ="text" id="player1"><br>
     <label for="player2">Player 2</label>
     <input type="text" id="player2"><br>
   </section>
-  
   <input id="submit" type="submit" value="Let's play!">
+</aside>
 
-</aside> -->
+
+<aside id="gameInformation">
+<p>Now Playing</p>
+<p id="currentPlayerName"></p>
+</aside>
+
+<aside id="victory">
+  <h3>Game Over!</h3>
+</aside>
 
   <div id="freedom" class="target">
     <div id="player2goal"></div>
@@ -31,14 +39,12 @@
   </div>
   
 
-  <section class="allDice">
-    <section id="d6-1" class ="spillover">
-      <div class="dice p1die"></div>
-    </section>
-    <section id="d6-2" class="spillover">
+  
+    <section class="diceWrapper">
+      <div class="dice p1die"></div>    
       <div class="dice p2die"></div>
     </section>
-  </section>
+
 
   <div id="board">
 
