@@ -1,30 +1,13 @@
 class Player {
-<<<<<<< HEAD
-  constructor(discClass, homeField) {
-    this.discClass = discClass;
-    this.$homeField = homeField;
-    this.canBearOff = false;
-=======
   constructor(discClass, homeField, dieClass) {
     this.discClass = discClass;
     this.homeField = homeField;
     this.dieClass = dieClass;
->>>>>>> rewind
     this.onBar = false;
     this.piecesBornOff = 0;
     this.occupiedPoints = [];
     this.legalPoints = [];
     this.hasRolled = false;
-<<<<<<< HEAD
-    this.occupiedPoints = [];
-    this.legalPoints = [];
-  }
-takeTurn() {
-    if (this.hasRolled) {
-      this.checkCanBearOff();
-      this.checkLegalMoves();
-    }
-=======
     this.canBearOff = false;
   }
 
@@ -36,7 +19,6 @@ takeTurn() {
       // gameManager.currentPlayer.checkBearOffMoves()
     }
     $('li.clickable').on('click', gameManager.currentPlayer.getPiece);
->>>>>>> rewind
   }
   checkLegalMoves() {
     gameManager.currentPlayer.checkOnBar();
@@ -56,21 +38,6 @@ takeTurn() {
         if($(`#${gameManager.points[i]} .piece`).hasClass(gameManager.currentPlayer.discClass)) {
           gameManager.currentPlayer.occupiedPoints.push(gameManager.points[i]);
         }
-<<<<<<< HEAD
-      }
-      for(let i = 0; i < this.occupiedPoints.length; i++) {
-        this.legalPoints.push(this.checkCanMove(this.occupiedPoints[i]));
-      }
-      if(gameManager.dieResults.length > 0 && !this.legalPoints.includes(true)) {
-        console.log('No legal moves, player must forfeit turn');
-        gameManager.switchPlayer();
-      }
-
-      for (let i = 0; i < this.legalPoints.length; i++) {
-        if(this.legalPoints[i]) {
-          // NOTE modify appearance of mobile discs here
-          $(`#${this.occupiedPoints[i]} .piece`).addClass('clickable');
-=======
       } // once all pieces are located, run them through a different function that determines if there are legal moves from that point
       for(let i = 0; i < gameManager.currentPlayer.occupiedPoints.length; i++) {
         gameManager.currentPlayer.legalPoints.push(gameManager.currentPlayer.checkCanMove(gameManager.currentPlayer.occupiedPoints[i]));
@@ -82,16 +49,11 @@ takeTurn() {
       for (let i = 0; i < gameManager.currentPlayer.legalPoints.length; i++) {
         if(gameManager.currentPlayer.legalPoints[i]) {
           $(`#${gameManager.currentPlayer.occupiedPoints[i]} .piece`).addClass('clickable');
->>>>>>> rewind
         }
       }
     }
     $('.clickable.piece').on('click', this.getPiece);
   }
-<<<<<<< HEAD
-
-=======
->>>>>>> rewind
   checkCanMove(startPoint) {
     let startIndex = gameManager.points.findIndex(point => point === startPoint);
     for (let i = 0; i < gameManager.points.length; i++) {
@@ -103,29 +65,9 @@ takeTurn() {
         }
       } return false;
   }
-<<<<<<< HEAD
-
-  checkCanBearOff() {
-    // if (this.$homeField.length === 15 - this.piecesBornOff) {
-    //   this.canBearOff = true;
-    // } else {
-    //   this.canBearOff = false;
-    // }
-
-    if(this.canBearOff) {
-      console.log('go ahead and bear off');
-      // TODO think about how this works
-      $()
-
-    } else {
-      console.log('cannot bear off yet');
-    }
-  }
-=======
   checkCanBearOff() {  
     // if all of a player's pieces that are still on the board are in their home field, then bearing off is legal
     const piecesinHomeField = gameManager.currentPlayer.homeField.children().children('.piecesList').children(`.${gameManager.currentPlayer.discClass}`).length;
->>>>>>> rewind
 
     if (piecesinHomeField === 15 - gameManager.currentPlayer.piecesBornOff) {
       gameManager.currentPlayer.canBearOff = true;
@@ -139,17 +81,6 @@ takeTurn() {
     }
   }
   getPiece(e) {
-<<<<<<< HEAD
-    $('.piece').removeClass('clickable');
-    $(e.target).addClass('selected');
-    $('.point').on('click', gameManager.checkPermittedDistance);
-    // TODO still gotta figure out how to make it possible to move by clicking the pieces occupying a bar
-  }
-}
-
-const player1 = new Player('player1', '#player1home');
-const player2 = new Player('player2', '#player2home');
-=======
     // grabs location of clickable piece
     gameManager.$selectedPiece = $(e.target);
     // begins checking if move is legal when player then clicks on a point or off the board for bearing off
@@ -232,7 +163,6 @@ const getPlayerNames = function() {
 
   $('#playerInformation').remove();
 }
->>>>>>> rewind
 
 
 const gameManager = {
@@ -281,11 +211,8 @@ const gameManager = {
   ],
   // i made weird choices about naming points in the dom, whoops, so here's an array of their ids in order to reference
   points: ['l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9', 'l10', 'l11', 'l12', 'r12', 'r11', 'r10', 'r9', 'r8', 'r7', 'r6', 'r5', 'r4', 'r3', 'r2', 'r1'],
-<<<<<<< HEAD
-=======
   $selectedPiece: null,
   selectedPieceIndex: null,
->>>>>>> rewind
   $selectedPoint: null,
   dieResults: [],
   currentPlayer: player1,
@@ -298,19 +225,9 @@ const gameManager = {
     } 
   },
   checkPermittedDistance(e) {
-<<<<<<< HEAD
-    if($(e.target).hasClass('.piece')) {
-      gameManager.$selectedPoint = $(e.target).parent();
-    } else {
-      gameManager.$selectedPoint = $(e.target).siblings('.piecesList');
-    }
-    const start = $('.selected').parent().parent().attr('id');
-    const target = gameManager.$selectedPoint.parent().attr('id');
-=======
     let startPoint = null;
     // if the player has clicked a piece that has been made interactable, go ahead and run the rest of this function
     if((gameManager.$selectedPiece) && gameManager.$selectedPiece.hasClass('clickable')) {
->>>>>>> rewind
 
 
       startPoint = gameManager.$selectedPiece.parent().parent().attr('id');
@@ -360,19 +277,6 @@ const gameManager = {
     }
   },
   movePiece(usedResult) {
-<<<<<<< HEAD
-    gameManager.dieResults.splice(usedResult, 1);
-    gameManager.$selectedPoint.append($('.selected'));
-    $('.selected').toggleClass('selected');
-    if (gameManager.dieResults.length === 0) {
-      gameManager.switchPlayer();
-    }
-    if(!$('#barredPieces .piece').hasClass(gameManager.currentPlayer.discClass)) {
-      gameManager.currentPlayer.onBar = false;
-    }
-    gameManager.currentPlayer.checkCanBearOff();
-    gameManager.currentPlayer.checkLegalMoves();    
-=======
     // move the piece
     gameManager.$selectedPoint.append(gameManager.$selectedPiece);
     gameManager.postMoveCheck(usedResult);
@@ -389,7 +293,6 @@ const gameManager = {
       // switch player if all moves have been taken
       gameManager.switchPlayer();
     }
->>>>>>> rewind
   },
 
   switchPlayer() {
@@ -407,12 +310,6 @@ const gameManager = {
   gameManager.resetDice()
   },
   rollDice() {
-<<<<<<< HEAD
-    console.log('start turn');
-    gameManager.dieResults = [];
-    while(gameManager.dieResults.length < 2) {
-      gameManager.dieResults.push(Math.ceil(Math.random() * 6));
-=======
     // make sure any alerts from the last player's turn are removed from the sidebar, and that memory is not retaining roll results from a previous turn
     $('.alert').remove();
     gameManager.dieResults = [];
@@ -422,7 +319,6 @@ const gameManager = {
       let number = Math.ceil(Math.random() * 6)
       gameManager.dieResults.push(number);
       $('.diceWrapper').children().eq(i).text(number);
->>>>>>> rewind
     }
 
     // give player four moves of the same distane if they rolled doubles
@@ -432,12 +328,6 @@ const gameManager = {
         gameManager.dieResults.push(gameManager.dieResults[0]);
       }
     }
-<<<<<<< HEAD
-      console.log(gameManager.dieResults);
-      gameManager.currentPlayer.hasRolled = true;
-      gameManager.currentPlayer.takeTurn();
-    }
-=======
     // start turn
     gameManager.currentPlayer.hasRolled = true;
     gameManager.currentPlayer.startTurn();
@@ -451,7 +341,6 @@ const gameManager = {
       $('.dice').addClass(gameManager.currentPlayer.discClass);
       $('.dice').text('');
   }
->>>>>>> rewind
 }
 
 

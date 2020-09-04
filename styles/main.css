@@ -25,18 +25,6 @@ body {
   align-items: center;
 }
 
-<<<<<<< HEAD
-button {
-  align-self: flex-end;
-  /* margin: 0 0 100px; */
-}
-
-.freedom {
-  align-self: flex-start;
-}
-
-=======
->>>>>>> rewind
 #board {
   border: 3px solid black;
   background-color: var(--board);
@@ -153,19 +141,6 @@ li{
   position: absolute;
 }
 
-<<<<<<< HEAD
-.selected {
-  border: 2px solid gold;
-  opacity: 1;
-}
-
-.clickable {
-  opacity: 1;
-}
-
-.legalTarget {
-  outline-color: gold;
-=======
 #playerInformation {
   border-radius: 15px;
   padding: 50px;
@@ -239,5 +214,4 @@ left: 50px;
   z-index: 2;
   justify-content: center;
   align-items: center;
->>>>>>> rewind
 }
