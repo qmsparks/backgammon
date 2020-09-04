@@ -24,10 +24,7 @@ body {
   align-items: center;
 }
 
-button {
-  align-self: flex-end;
-  margin: 0 0 50px;
-}
+
 
 #board {
   border: 3px solid black;
@@ -133,4 +130,65 @@ li{
   background-color: gold;
   align-self: flex-start;
   margin: 75px 0 0;
+}
+
+#playerInformation {
+  border-radius: 15px;
+  padding: 50px;
+  background-color: plum;
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#inputFields {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+input[type=submit] {
+  margin:  0 0 10px;
+}
+
+.allDice {
+  align-self: flex-end;
+  width: 125px;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 50px;
+}
+
+.dice {
+  width: 45px;
+  height: 45px;
+  /* display: grid; */
+  border: 2px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.p1die {
+  background-color: var(--player1);
+}
+
+.p2die {
+  background-color: var(--player2);
+}
+
+.spillover {
+  display: flex;
+  flex-direction: column-reverse;
+  height: 100px;
+  justify-content: space-between; 
+}
+
+button {
+  align-self: flex-end;
+  margin: 0 0 50px;
 }

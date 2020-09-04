@@ -1,7 +1,8 @@
 class Player {
-  constructor(discClass, homeField) {
+  constructor(discClass, homeField, dieClass) {
     this.discClass = discClass;
     this.homeField = homeField;
+    this.dieClass = dieClass;
     this.onBar = false;
     this.canDisbar = [];
     this.disbarOptions = [];
@@ -154,8 +155,16 @@ class Player {
 
 }
 
-const player1 = new Player('player1', $('#home .points.right'));
-const player2 = new Player('player2', $('#home .points.left'));
+const player1 = new Player('player1', $('#home .points.right'), 'p1die');
+const player2 = new Player('player2', $('#home .points.left'), 'p2die');
+
+const getPlayerNames = function() {
+
+  player1.name = $('#player1').val();
+  player2.name = $('#player2').val();
+
+  $('#playerInformation').hide();
+}
 
 
 const gameManager = {
@@ -288,11 +297,25 @@ const gameManager = {
         gameManager.dieResults.push(gameManager.dieResults[0]);
       }
     }
+
+    $(`.${gameManager.currentPlayer.dieClass}`).text(gameManager.dieResults[0]);
+    $(`.${gameManager.currentPlayer.dieClass}`).parent().append($(`<div class="dice ${gameManager.currentPlayer.dieClass}" />`).text(gameManager.dieResults[1]));
+
+
       console.log(gameManager.dieResults);
       gameManager.currentPlayer.hasRolled = true;
       gameManager.currentPlayer.startTurn();
     }
 }
 
+
+
+$('#submit').on('click', getPlayerNames);
+
 gameManager.setUp.forEach(gameManager.populateBoard);
-$('button').on('click', gameManager.rollDice);
+
+if (gameManager.currentPlayer === player1) {
+  $('.p1die').on('click', gameManager.rollDice);
+} else if (gameManager.currentPlayer === player2) {
+  $('.p2die').on('click', gameManager.rollDice);
+}
