@@ -13,29 +13,16 @@ class Player {
   }
 
   startTurn() {
-
     // once the player has rolled:
     // first check if there are any legal moves available to them
-
-
     if(gameManager.currentPlayer.hasRolled) {
       gameManager.currentPlayer.checkLegalMoves();
+      gameManager.currentPlayer.checkBearOffMoves()
     }
-    gameManager.currentPlayer.checkCanBearOff();
-
     $('li.clickable').on('click', gameManager.currentPlayer.getPiece);
-
-
-      // if (gameManager.currentPlayer.hasRolled) {
-      //   gameManager.currentPlayer.checkCanBearOff();
-
-      //   if(gameManager.$selectedPiece) {
-      //     gameManager.currentPlayer.checkLegalMoves();
-      //   }
-      // }
-      // $('li.clickable').on('click', gameManager.currentPlayer.getPiece);
   }
-  
+
+
   checkLegalMoves() {
     console.log('checking to see if player has any pieces on the bar');
     if ($('#barredPieces li').hasClass(gameManager.currentPlayer.discClass)) {
@@ -104,37 +91,55 @@ class Player {
     $('.target').on('click', gameManager.checkPermittedDistance);
   }
 
-  attemptBearOff() {
+  checkBearOffMoves() {
+    gameManager.currentPlayer.checkCanBearOff();
+    if (gameManager.currentPlayer.canBearOff) {
 
-    let bearOffPoints = gameManager.currentPlayer.homeField.children().children('.piecesList');
-    let highestOccupiedIndex = 0;
-    let highestNecessaryRoll = 0;
+      let homePoints = gameManager.currentPlayer.homeField.children().children('.piecesList');
+      let highestOccupiedIndex = 0;
+      let highestNecessaryRoll = 0;
 
-    // scan through all points in the home field and find the highest occupied point
-    for(let i = 0; i < bearOffPoints.length; i++) {
-      if(bearOffPoints.eq(i).children().hasClass(`${this.discClass}`)) {
-        if (i > highestOccupiedIndex) {
-          highestOccupiedIndex = i;
-        }
-      } 
-    }
-    highestNecessaryRoll = highestOccupiedIndex + 1;
+      const legalPoints = [];
 
-    gameManager.dieResults.forEach(function(result, index) {
-      if(result > highestNecessaryRoll) {
-        gameManager.dieResults[index] = highestNecessaryRoll;
+      // scan through all points in the home field and find the highest occupied point
+      for(let i = 0; i < homePoints.length; i++) {
+        if(homePoints.eq(i).children().hasClass(`${this.discClass}`)) {
+          if (i > highestOccupiedIndex) {
+            highestOccupiedIndex = i;
+          }
+        } 
       }
-    });
+      highestNecessaryRoll = highestOccupiedIndex + 1;
 
-    // make sure that the program is getting the home field equivalent of the selected piece's index
+      gameManager.dieResults.forEach(function(result, index) {
+        if(result > highestNecessaryRoll) {
+          gameManager.dieResults[index] = highestNecessaryRoll;
+        }
+      });
 
+      
+      for(let i = 0; i < homePoints.length; i++) {
+        if(homePoints.eq(i).children().hasClass(`${this.discClass}`) && gameManager.dieResults.includes(i + 1)) {
+            legalPoints.push(homePoints.eq(i));
+        } 
+      }
+      console.log('legalPoints: ', legalPoints);
+
+      legalPoints.forEach(function(point) {
+        console.log('adding clickable class to pieces that can be borne off');
+        $(point).children().addClass('clickable');
+      });
+
+    }
+  }
+
+  bearOff() {
 
     if(gameManager.selectedPieceIndex > 5) {
       gameManager.selectedPieceIndex = 23 - gameManager.selectedPieceIndex;
     }
 
     let usedResult = gameManager.selectedPieceIndex + 1;
-
     let spliceIndex = gameManager.dieResults.findIndex(value => value === usedResult);
 
     if (gameManager.dieResults.includes (usedResult)) {
@@ -212,10 +217,6 @@ const gameManager = {
   checkPermittedDistance(e) {
     let startPoint = null;
 
-    // if (!gameManager.$selectedPiece.hasClass('clickable')) {
-    //   gameManager.$selectedPiece = null;
-    // }
-
     if((gameManager.$selectedPiece) && gameManager.$selectedPiece.hasClass('clickable')) {
       startPoint = gameManager.$selectedPiece.parent().parent().attr('id');
     
@@ -237,14 +238,11 @@ const gameManager = {
         let usedResult = gameManager.dieResults.findIndex(number => number === distance);
         gameManager.checkValidMove(usedResult);
       }
-    } // attempting to bear piece off the board 
-    else if($(e.target).attr('id') === 'freedom' &&  gameManager.currentPlayer.canBearOff) {
-      console.log('attempting to bear off');
-      if(gameManager.selectedPieceIndex !== -1) {
-      gameManager.currentPlayer.attemptBearOff();
+    } 
+      else if($(e.target).attr('id') === 'freedom' &&  gameManager.currentPlayer.canBearOff) {
+        gameManager.currentPlayer.bearOff();
       }
     }
-  }
   },
 
   checkValidMove(usedResult) {
@@ -254,7 +252,6 @@ const gameManager = {
       console.log(`Illegal move`);
     } else {
       $('#barredPieces').append(gameManager.$selectedPoint.children().eq(0));
-      // gameManager.currentOpponent.onBar = true;
       gameManager.movePiece(usedResult);
     }
   },
